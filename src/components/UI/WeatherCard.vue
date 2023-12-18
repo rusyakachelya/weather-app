@@ -1,5 +1,6 @@
 <template>
   <div class="weather-card">
+    <div class="weather-day">{{ weather.day }} <span>{{weather.date}}</span></div>
     <div class="timeline-container">
       <div class="titles">
         <p>Час</p>
@@ -7,7 +8,7 @@
         <p>Відчувається як</p>
       </div>
       <TimelineCard
-          v-for="(timeline, index) in weather"
+          v-for="(timeline, index) in weather.weatherData"
           :key="index"
           :timeline="timeline"
       />
@@ -24,14 +25,7 @@ export default {
   methods: {
 
   },
-  computed: {
-    roundTemperature() {
-      return this.weather[0].main['temp'] % 1 < 0.5 ? Math.floor(this.weather[0].main['temp']) : Math.ceil(this.weather[0].main['temp'])
-    },
-    roundFeelsLikeTemp(){
-      return this.weather[0].main['feels_like'] % 1 < 0.5 ? Math.floor(this.weather[0].main['feels_like']) : Math.ceil(this.weather[0].main['feels_like'])
-    },
-  },
+  computed: {},
   mounted() {
   }
 }
@@ -50,8 +44,8 @@ export default {
   font-size: 11px;
   color: #777;
 }
-.card-content{
-
+.weather-day{
+  padding: 5px;
 }
 .weather-card{
   display: flex;
@@ -60,6 +54,7 @@ export default {
   border-bottom-right-radius: 20px;
   border-top-right-radius: 20px;
   color: black;
+  flex-direction: column;
   margin-bottom: 10px;
 }
 .weather-card-container{

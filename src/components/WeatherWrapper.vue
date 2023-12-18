@@ -1,7 +1,8 @@
 <template>
   <div class="weather-wrapper">
     <div class="change-tabs">
-      <div class="tab" @click="changeTab('1-day')">1 день</div> <span>/</span>
+      <div class="tab" @click="changeTab('1-day')">1 день</div>
+      <span>/</span>
       <div class="tab" @click="changeTab('5-days')">5 днів</div>
     </div>
     <div class="buttons-container">
@@ -10,7 +11,7 @@
     </div>
     <ConfirmModal
         :is-open="isModalOpen"
-        message="Вы уверены, что хотите удалить элемент?"
+        message="Ви впевнені, що хочете видалити елемент??"
         @deleteConfirmed="deleteConfirmed"
         :on-cancel="closeModal"
     />
@@ -25,7 +26,7 @@
 import WeatherCardList from "@/components/WeatherCardList.vue";
 import ConfirmModal from "@/components/UI/ConfirmModal.vue";
 
-import { saveWeatherData } from "@/services/weatherDataService";
+import {saveWeatherData} from "@/services/weatherDataService";
 
 export default {
   name: "WeatherWrapper",
@@ -42,9 +43,16 @@ export default {
     changeTab(tab) {
       this.selectedTab = tab
     },
+    extractDateComponents(dateString) {
+      const dateObject = new Date(dateString);
+
+      const day = dateObject.getDate();
+
+      return day;
+    },
     shiftDays(object) {
       const daysOfWeek = Object.keys(object);
-      const currentDayIndex = new Date().getDay();
+      const currentDayIndex = new Date().getDay() - 1;
       const shiftedDays = daysOfWeek.slice(currentDayIndex).concat(daysOfWeek.slice(0, currentDayIndex));
       const shiftedObject = {};
 
@@ -52,7 +60,16 @@ export default {
         shiftedObject[day] = object[day];
       });
 
-      return shiftedObject;
+      const transformData = Object.entries(shiftedObject).map(([day, weatherData]) => {
+        return {
+          day,
+          weatherData,
+          date: this.extractDateComponents(weatherData[0].dt_txt)
+        };
+      });
+
+
+      return transformData;
     },
 
     openModal() {
@@ -67,14 +84,25 @@ export default {
       this.closeModal()
     },
 
-    addToFavorites(cityName ,key) {
+    addToFavorites(cityName, key) {
       saveWeatherData(cityName, key)
+    },
+
+    arrayToObject(currentDayName, array) {
+      const resultObject = {
+        [currentDayName]: array,
+      };
+
+      return Object.entries(resultObject).map(([day, weatherData]) => ({
+        day,
+        weatherData,
+      }));
     },
 
     removeCity(cityName) {
       const arrKey = this.getDefiniteCities
       const cities = JSON.parse(window.localStorage.getItem(arrKey))
-      const  updatedCities = cities.filter(city => city != cityName)
+      const updatedCities = cities.filter(city => city != cityName)
       localStorage.setItem(arrKey, JSON.stringify(updatedCities));
       window.location.reload();
     },
@@ -87,14 +115,20 @@ export default {
       const currentDayName = this.daysOfWeek[currentDate.getDay()];
 
       const selectedData = this.selectedTab === '1-day' ? this.weather.list[currentDayName] : this.weather.list;
-      const arrayToObject = (array) => {
-        const resultObject = {
-          [currentDayName]: array,
-        };
-        return resultObject;
-      };
+      // const arrayToObject = (array) => {
+      //   const resultObject = {
+      //     [currentDayName]: array,
+      //   };
+      //   const transformData = Object.entries(resultObject).map(([day, weatherData]) => {
+      //     return {
+      //       day,
+      //       weatherData,
+      //     };
+      //   });
+      //   return transformData;
+      // };
 
-      return this.selectedTab === '1-day' ? arrayToObject(selectedData) : this.shiftDays(selectedData);
+      return this.selectedTab === '1-day' ? this.arrayToObject(currentDayName,selectedData) : this.shiftDays(selectedData);
     },
     isMainPage() {
       return this.$route.path === '/';
@@ -110,20 +144,24 @@ export default {
 
 <style scoped>
 
-.buttons-container{
+.buttons-container {
   display: flex;
   justify-content: center;
 }
-.buttons-container div{
- cursor: pointer;
+
+.buttons-container div {
+  cursor: pointer;
   padding: 5px;
 }
-.to-favorites:hover{
+
+.to-favorites:hover {
   color: #177de5;
 }
-.remove-btn:hover{
+
+.remove-btn:hover {
   color: #ab1e1e;
 }
+
 .change-tabs {
   justify-content: end;
   display: flex;

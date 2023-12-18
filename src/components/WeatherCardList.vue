@@ -9,6 +9,7 @@
   </div>
 </template>
 
+
 <script>
 import WeatherCard from "@/components/UI/WeatherCard.vue";
 
@@ -22,7 +23,9 @@ export default {
   },
   props: ['list', 'city',],
   components: {WeatherCard},
-  computed: {},
+  computed: {
+
+  },
   methods: {},
 }
 </script>

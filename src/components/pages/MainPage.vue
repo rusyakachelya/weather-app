@@ -19,6 +19,13 @@
     </ul>
 
 
+    <LoadingIndicator
+      :is-loading="isLoading"
+    />
+    <NoContentBlock
+      :has-data="weatherData.length > 0"
+      :message="noContentMessage"
+    />
     <WeatherWrapper
         v-for="(weather, index) in weatherData"
         :key="index"
@@ -37,15 +44,20 @@ import { groupAndSortData } from "@/services/groupAndSortData";
 import { saveWeatherData, getSavedCities, getWeatherDataForCities } from "@/services/weatherDataService";
 
 import WeatherWrapper from "@/components/WeatherWrapper.vue";
+import LoadingIndicator from "@/components/UI/LoadingIndicator.vue";
+import NoContentBlock from "@/components/UI/NoContentBlock.vue";
 
 
 export default {
   name: "MainPage",
   components: {
-    WeatherWrapper
+    WeatherWrapper,
+    LoadingIndicator,
+    NoContentBlock
   },
   data() {
     return {
+      noContentMessage: 'Додайте свої улюблені міста та отримуйте актуальну інформацію про погоду у зручний для вас спосіб!',
       city: '',
       weatherData: [],
       suggestions: [],
@@ -63,21 +75,22 @@ export default {
       selectedTab: '1-day',
       oneDayData: null,
       newList: {},
-      cities: null
+      cities: null,
+      isLoading: false
 
     }
   },
   methods: {
     debouncedGetWeatherData: debounce(function () {
+      this.isLoading = true
       const queries = {
         q: this.city,
         units: 'metric',
-        lang: 'ua',
+        lang: 'uk',
       }
 
       getWeatherData(queries)
           .then(data => {
-            console.log(data)
             this.weatherData.unshift({
               code: data['city']['name'],
               list: groupAndSortData(data.list)
@@ -85,8 +98,11 @@ export default {
             saveWeatherData(data['city']['name'],'weatherData')
             this.city = ''
           })
+          .finally(() => {
+            this.isLoading = false
+          })
 
-    }, 1000),
+    }, 500),
     handleInput() {
       const inputValue = this.city.toLowerCase();
 
@@ -113,14 +129,17 @@ export default {
     }
   },
   mounted() {
-     getWeatherDataForCities(getSavedCities('weatherData')).then(dataArray => {
-       this.weatherData = dataArray.map(item => {
-         return {
-           code: item['city']['name'],
-           list: groupAndSortData(item.list)
-         }
-       })
-     })
+    this.isLoading = true
+    getWeatherDataForCities(getSavedCities('weatherData'))
+        .then(dataArray => {
+          this.weatherData = dataArray.map(item => ({
+            code: item['city']['name'],
+            list: groupAndSortData(item.list),
+          }));
+        })
+        .finally(() => {
+          this.isLoading = false; // Позначте, що дані завантажено
+        });
 
   }
 }
@@ -129,7 +148,7 @@ export default {
 <style scoped>
 
 .input-container{
-  padding: 15px;
+  padding: 15px 15px 5px 15px;
   position: relative;
 }
 .input-list {
@@ -198,7 +217,9 @@ li {
   padding: 8px;
   cursor: pointer;
 }
-
+p{
+  font-size: 3px;
+}
 li:hover {
   background-color: #6dabf2;
   color: white;
