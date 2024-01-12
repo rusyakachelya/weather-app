@@ -19,31 +19,36 @@ export default {
 
 <style scoped>
 
-.preloader-container{
+.preloader-container {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
 }
+
 .preloader {
-  border: 4px solid #3498db; /* Колір для країв preloader (змінюйте за потребою) */
-  border-top: 4px solid transparent; /* Залишаємо верхній край transparent, щоб уникнути кута в центрі */
-  border-radius: 50%; /* Круглий preloader */
-  width: 40px; /* Ширина preloader */
-  height: 40px; /* Висота preloader */
-  animation: spin 1s linear infinite; /* Анімація обертання */
-  margin: 90px auto ; /* Центруємо по горизонталі та вертикалі */
+  border: 4px solid #3498db;
+  border-top: 4px solid transparent;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin: 90px auto;
 
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

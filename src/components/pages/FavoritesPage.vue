@@ -4,26 +4,27 @@
         v-for="(weather, index) in favorites"
         :key="index"
         :weather="weather"
+        @removeCityById="removeCityById"
     />
     <LoadingIndicator
         :is-loading="isLoading"
     />
     <NoContentBlock
-      :has-data="favorites.length > 0"
-      :message="noContentMessage"
+        :has-data="favorites.length > 0"
+        :message="$t('noContentBlocksMessages.favoritesPage')"
     />
-
   </div>
 </template>
 
 <script>
-import WeatherWrapper from "@/components/WeatherWrapper.vue";
+import WeatherWrapper from "@/components/WeatherWrapper/WeatherWrapper.vue";
 import LoadingIndicator from "@/components/UI/LoadingIndicator.vue";
 import NoContentBlock from "@/components/UI/NoContentBlock.vue";
 
-import {getSavedCities, getWeatherDataForCities} from "@/services/weatherDataService";
-import {groupAndSortData} from "@/services/groupAndSortData";
-
+import {getWeatherDataForCities} from "@/services/weatherDataService";
+import {getItemsFromLocalStorage, updateLocalStorage,} from "@/services/localStorageService";
+import {groupAndSortData} from "@/helpers/groupAndSortData";
+import {shortLocale} from "@/helpers/i18nHelpers";
 
 export default {
   name: "FavoritesPage",
@@ -31,26 +32,56 @@ export default {
   data() {
     return {
       favorites: [],
-      noContentMessage: 'Ваш список улюблених міст порожній. Додайте міста, щоб стежити за погодою в них!',
       isLoading: false
     }
   },
-  methods: {},
-  mounted() {
-    this.isLoading = true
-    getWeatherDataForCities(getSavedCities('favorites'))
-        .then(dataArray => {
-          this.favorites = dataArray.map(item => {
-            return {
-              code: item['city']['name'],
-              list: groupAndSortData(item.list)
-            }
-          })
-        })
-        .finally(() => {
-          this.isLoading = false
-        })
-  }
+  methods: {
+    removeCityById(cityId) {
+      this.isLoading = true
+      setTimeout(() => {
+        const cities = getItemsFromLocalStorage('favorites')
+        updateLocalStorage('favorites', cities, cityId)
+        this.favorites = this.favorites.filter(city => city.id !== cityId)
+        this.isLoading = false
+      }, 500)
+    },
+    async fetchDataForFavorites() {
+      try {
+        this.isLoading = true
+        const dataArray = await getWeatherDataForCities(getItemsFromLocalStorage('favorites'), shortLocale(this.locale));
+        return dataArray.map(async (item) => {
+          const { city, list } = item;
+          const code = city.name;
+          const id = city.id;
+          const sortedData = groupAndSortData(list);
+
+          return {
+            code,
+            id,
+            list: sortedData
+          };
+        });
+      } catch (error) {
+        console.error('Произошла ошибка при получении данных:', error);
+        throw error;
+      } finally {
+        this.isLoading = false;
+      }
+    },
+  },
+  async mounted() {
+    this.fetchDataForFavorites().then(data => this.favorites = data)
+  },
+  computed: {},
+  watch: {
+    '$i18n.locale': {
+      async handler() {
+        this.favorites = await this.fetchDataForFavorites()
+      },
+    },
+  },
+
+
 }
 </script>
 

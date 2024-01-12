@@ -1,0 +1,43 @@
+{
+  "routes": {
+    "main": "Main",
+    "favorites": "Favorites"
+  },
+  "placeholder": "Name of the settlement",
+  "buttons": {
+    "favorited": {
+      "addToFavorite" : "Add to favorites",
+      "removeFromFavorite": "Remove from favorites"
+    },
+    "remove": "Remove",
+    "todaysForecast": "today's forecast",
+    "fiveDayForecast": "5-day forecast"
+  },
+  "timelineTitles" : {
+    "time" : "Time",
+    "temperature": "Temperature",
+    "feelsLike": "It feels like"
+  },
+  "switchText": "Switch language on",
+  "temperatures" : {
+    "min" : "min",
+    "max" : "max"
+  },
+  "noContentBlocksMessages": {
+    "mainPage" : "Add your favorite cities and get up-to-date weather information in a way that's convenient for you!",
+    "favoritesPage": "Your list of favorite cities is empty. Add cities to track their weather!"
+  },
+  "modals" : {
+    "confirmModal" : {
+      "buttons": {
+        "confirm" : "Confirm",
+        "cancel" : "Cancel"
+      },
+      "message": "Are you sure you want to delete the item??"
+    },
+    "warningModal" : "The maximum number of selected cities has been reached. To add a new city, please delete one of the existing ones"
+  },
+  "graphLabel" : "Graph (°C)",
+  "notification": "Sorry, but this city has already been added to your list. Check out your favorite cities in the weather widget."
+
+}
