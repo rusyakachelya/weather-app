@@ -50,7 +50,7 @@ export default {
         this.isLoading = true
         const dataArray = await getWeatherDataForCities(getItemsFromLocalStorage('favorites'), shortLocale(this.locale));
         return dataArray.map(async (item) => {
-          const { city, list } = item;
+          const {city, list} = item;
           const code = city.name;
           const id = city.id;
           const sortedData = groupAndSortData(list);
@@ -68,17 +68,18 @@ export default {
         this.isLoading = false;
       }
     },
+
+    async updateFavoritesData() {
+      const dataPromises = await this.fetchDataForFavorites();
+      this.favorites = await Promise.all(dataPromises);
+    }
+
   },
-  async mounted() {
-    this.fetchDataForFavorites().then(data => this.favorites = data)
+   mounted() {
+    this.updateFavoritesData()
   },
-  computed: {},
   watch: {
-    '$i18n.locale': {
-      async handler() {
-        this.favorites = await this.fetchDataForFavorites()
-      },
-    },
+    '$i18n.locale': 'updateFavoritesData'
   },
 
 
